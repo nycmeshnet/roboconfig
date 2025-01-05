@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roboconfig"
+description = "Automatically apply configuration to NYC Mesh devices."
+version = "0.0.1"
+
+license = {text = "MIT License"}
+
+dependencies = [
+  "GitPython==3.1.43",
+  "requests==2.32.3",
+  "click==8.1.8",
+  "paramiko==3.5.0",
+  "scp==0.15.0",
+]
+
+[project.optional-dependencies]
+iac = [
+  "ansible",
+  "passlib==1.7.4",
+]
+
+authors = [
+  {email = "jameso@nycmesh.net"},
+]
+
+[project.scripts]
+roboconfig-cli = "roboconfig.main_cli:main"
+roboconfig-interactive = "roboconfig.main_interactive:main"
