@@ -1,6 +1,7 @@
 import re
 from .roboconfig import RoboConfig
 from .utils import apply_mikrotik_config
+from .tplink import tplink_setup
 
 
 def _get_value_console(prompt, constraint):
@@ -30,36 +31,39 @@ def main():
     local_config_file = "output.rsc"
     c = RoboConfig()
 
-    possible_tags = c.get_tag_options()
-    tag = _select_value_console("Enter config version", possible_tags)
-    c.set_tag(tag)
-
-    number = int(_get_value_console("Enter install/node number", "^[0-9]+$"))
-
-    possible_devices = ["HAPac2", "LiteBeam5AC", "LiteBeamLR", "Omnitik5AC", "SXTsq5AC"]
+    possible_devices = ["ArcherA6", "Omnitik5AC"]#"LiteBeam5AC", "LiteBeamLR", "SXTsq5AC", "HAPac2"]
     device = _select_value_console("Enter device", possible_devices)
 
-    possible_templates = c.get_template_options(device)
-    if len(possible_templates) > 0:
-        template = _select_value_console("Enter template", possible_templates)
+    if device == "ArcherA6":
+        tplink_setup()
     else:
-        template = possible_templates[0]
+        possible_tags = c.get_tag_options()
+        tag = _select_value_console("Enter config version", possible_tags)
+        c.set_tag(tag)
 
-    c.generate(device, template, {}, number, local_config_file)
+        number = int(_get_value_console("Enter install/node number", "^[0-9]+$"))
 
-    print("Applying config to device")
-    try:
-        apply_mikrotik_config(
-            "192.168.88.1",
-            "admin",
-            "",
-            local_config_file,
-            "flash/roboconfig_generated.rsc",
-        )
-    except:
-        print("Failed to apply configuration")
-        return
-    print("Done, wait for the beeps")
+        possible_templates = c.get_template_options(device)
+        if len(possible_templates) > 0:
+            template = _select_value_console("Enter template", possible_templates)
+        else:
+            template = possible_templates[0]
+
+        c.generate(device, template, {}, number, local_config_file)
+
+        print("Applying config to device")
+        try:
+            apply_mikrotik_config(
+                "192.168.88.1",
+                "admin",
+                "",
+                local_config_file,
+                "flash/roboconfig_generated.rsc",
+            )
+        except:
+            print("Failed to apply configuration")
+            return
+        print("Rebooting")
 
 
 if __name__ == "__main__":
