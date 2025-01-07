@@ -7,6 +7,7 @@ NTP2_DESIRED = "time.nist.gov"
 GUEST_SSID_2G = "-NYC Mesh guest 2G-"
 GUEST_SSID_5G = "-NYC Mesh guest-"
 
+
 def _setup_auth(page):
     setup_selector = 'a[title="Let\'s Get Started"]'
     try:
@@ -18,14 +19,17 @@ def _setup_auth(page):
         print("password alredy set logging in")
         _login(page)
 
+
 def _set_password(page):
     page.type(".password-container .password-text.password-hidden", PASSWORD)
     page.type("#confirm-pwd-tb .password-text", PASSWORD)
     page.click('a[title="Let\'s Get Started"]')
 
+
 def _login(page):
     page.type("input.password-text", PASSWORD)
     page.click('a[title="LOG IN"]')
+
 
 def _quit_setup(page):
     quit_selector = 'a[title="Quit"]'
@@ -37,8 +41,9 @@ def _quit_setup(page):
     except:
         print("no quit button, continuing")
 
+
 def _set_ntp(page):
-    page.goto('http://192.168.0.1/#timeSettings')
+    page.goto("http://192.168.0.1/#timeSettings")
     ntp1 = 'div[label-field="{TIMESETTING.NTP1}"] input'
     ntp2 = 'div[label-field="{TIMESETTING.NTP2}"] input'
     page.wait_for_selector(ntp1)
@@ -52,6 +57,7 @@ def _set_ntp(page):
         page.type(ntp1, NTP1_DESIRED)
         page.type(ntp2, NTP2_DESIRED)
         page.click('#save-data a[title="SAVE"]')
+
 
 def _set_guest_network(page):
     page.goto("http://192.168.0.1/#guestNetworkAdv")
@@ -90,6 +96,7 @@ def _set_auto_update(page):
         page.click('div[label-field="{FIRMWARE.AUTO_UPDATE}"] .switch-label')
         print("auto update enabled")
 
+
 def _check_update(page):
     page.goto("http://192.168.0.1/#firmware")
     check_update_selector = 'a[title="CHECK FOR UPDATES"]'
@@ -102,7 +109,7 @@ def _check_update(page):
     if check_update_button is not None:
         print("checking for updates")
         page.click(check_update_selector)
-        
+
     first_update_selector = '#online-upgrade-btn a[title="UPDATE"]'
     first_update_button = None
     try:
@@ -117,16 +124,21 @@ def _check_update(page):
     else:
         print("no update available")
 
+
 def tplink_setup():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
-        page.goto("http://192.168.0.1")
-        _setup_auth(page)
-        _quit_setup(page)
-        _set_ntp(page)
-        _set_guest_network(page)
-        _set_auto_update(page)
-        _check_update(page)
+        try:
+            page.goto("http://192.168.0.1")
+            _setup_auth(page)
+            _quit_setup(page)
+            _set_ntp(page)
+            _set_guest_network(page)
+            _set_auto_update(page)
+            _check_update(page)
+        except Exception as e:
+            page.screenshot(path="/tmp/error_screenshot.png")
+            print(str(e))
 
         browser.close()
