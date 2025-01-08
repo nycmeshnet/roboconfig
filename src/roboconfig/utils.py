@@ -2,6 +2,25 @@ from paramiko import SSHClient, AutoAddPolicy
 from scp import SCPClient
 
 
+def apply_config_to_device(device, local_config_file):
+    if device == "Omnitik5AC" or device == "HAPac2":
+        apply_mikrotik_config(
+            "192.168.88.1",
+            "admin",
+            "",
+            local_config_file,
+            "flash/roboconfig_generated.rsc",
+        )
+    elif device == "LiteBeam5AC" or device == "LiteBeamLR":
+        apply_lbe_config(
+            "192.168.1.20",
+            "ubnt",
+            "ubnt",
+            local_config_file,
+            "/var/etc/persistent/roboconfig_generated.rsc",
+        )
+
+
 def apply_mikrotik_config(ip, username, password, src, dst):
     with SSHClient() as ssh:
         ssh.set_missing_host_key_policy(AutoAddPolicy())
@@ -10,9 +29,11 @@ def apply_mikrotik_config(ip, username, password, src, dst):
         with SCPClient(ssh.get_transport()) as scp:
             scp.put(src, dst)
 
-        ssh.exec_command(
+        stdin, stdout, stderr = ssh.exec_command(
             f"/system reset-configuration no-defaults=yes run-after-reset={dst}",
         )
+        print(stdout.read())
+        print(stderr.read())
 
 
 def apply_lbe_config(ip, username, password, src, dst):

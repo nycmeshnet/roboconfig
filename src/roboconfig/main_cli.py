@@ -1,5 +1,6 @@
 import click
 from .roboconfig import RoboConfig
+from .utils import apply_config_to_device
 
 
 @click.command()
@@ -19,13 +20,19 @@ from .roboconfig import RoboConfig
 @click.option(
     "--param", default=[], help="Template parameters in format key:value", multiple=True
 )
-@click.option("--output", default=None, help="Output file")
-@click.option("--ip", default="192.168.88.1", help="IP to scp the config to")
-@click.option("--ssh", help="Deploy config via ssh", is_flag=True)
-def main(number, tag, device, template, param, output, ip, ssh):
+@click.option("--output", default="output.rsc", help="Output file")
+@click.option("--deploy", help="Deploy config via ssh", is_flag=True)
+def main(number, tag, device, template, param, output, deploy):
     c = RoboConfig()
     c.set_tag(tag)
     c.generate(device, template, param, number, output)
+
+    try:
+        if deploy:
+            apply_config_to_device(device, output)
+    except Exception as e:
+        print(str(e))
+        print("Failed to apply configuration")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 import re
 from .roboconfig import RoboConfig
-from .utils import apply_mikrotik_config, apply_lbe_config
+from .utils import apply_config_to_device
 from .tplink import tplink_setup
 
 
@@ -57,22 +57,7 @@ def main():
 
         print("Applying config to device")
         try:
-            if device == "Omnitik5AC" or device == "HAPac2":
-                apply_mikrotik_config(
-                    "192.168.88.1",
-                    "admin",
-                    "",
-                    local_config_file,
-                    "flash/roboconfig_generated.rsc",
-                )
-            elif device == "LiteBeam5AC" or device == "LiteBeamLR":
-                apply_lbe_config(
-                    "192.168.1.20",
-                    "ubnt",
-                    "ubnt",
-                    local_config_file,
-                    "/var/etc/persistent/roboconfig_generated.rsc",
-                )
+            apply_config_to_device(device, local_config_file)
         except Exception as e:
             print(e)
             print("Failed to apply configuration")
